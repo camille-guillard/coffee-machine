@@ -2,10 +2,10 @@ package project.logic.basic;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.AdditionalMatchers;
 import org.mockito.Mock;
 import project.drinkmaker.Drink;
 import project.drinkmaker.DrinkMaker;
-import project.drinkmaker.DrinkType;
 import project.logic.CoffeeMachine;
 
 import java.util.NoSuchElementException;
@@ -25,26 +25,36 @@ public class BasicDrinkMakerProtocolTest {
 
     @Before
     public void before() {
-        doReturn(drink).when(drinkMaker).getDrink(any(DrinkType.class), anyInt());
+        doReturn(drink).when(drinkMaker).getDrink(AdditionalMatchers.not(startsWith("M")));
+        doReturn(null).when(drinkMaker).getDrink(startsWith("M"));
     }
 
     @Test
-    public void testGetDrink() {
+    public void basicCommandTest() {
         CoffeeMachine coffeeMachine = new BasicDrinkMakerProtocol(drinkMaker);
-        Drink d = coffeeMachine.getDrink("T:1:0");
+        Command c = new Command();
+        c.setName("T");
+        c.setNumberOfSugar(1);
+        Drink d = coffeeMachine.getDrink(c);
         assertNotNull(d);
     }
 
     @Test(expected = NoSuchElementException.class)
-    public void testGetDrink2() {
+    public void commandNotFoundTest() {
         CoffeeMachine coffeeMachine = new BasicDrinkMakerProtocol(drinkMaker);
-        Drink d = coffeeMachine.getDrink("A:1:0");
+        Command c = new Command();
+        c.setName("A");
+        c.setNumberOfSugar(1);
+        Drink d = coffeeMachine.getDrink(c);
     }
 
     @Test
-    public void testGetDrink3() {
+    public void messageCommandTest() {
         CoffeeMachine coffeeMachine = new BasicDrinkMakerProtocol(drinkMaker);
-        Drink d = coffeeMachine.getDrink("M:Test");
+        Command c = new Command();
+        c.setName("M");
+        c.setMessage("Test");
+        Drink d = coffeeMachine.getDrink(c);
         assertNull(d);
     }
 

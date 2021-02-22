@@ -2,11 +2,12 @@ package project.logic.orange;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.AdditionalMatchers;
 import org.mockito.Mock;
 import project.drinkmaker.Drink;
-import project.drinkmaker.DrinkType;
-import project.drinkmaker.orange.HotDrinkMaker;
+import project.drinkmaker.DrinkMaker;
 import project.logic.CoffeeMachine;
+import project.logic.basic.Command;
 import project.logic.money.MoneyDrinkMakerProtocol;
 import project.logic.money.NotEnoughMoneyException;
 
@@ -19,69 +20,91 @@ import static org.mockito.Mockito.*;
 public class OrangeDrinkMakerProtocolTest {
 
     @Mock
-    HotDrinkMaker drinkMaker = mock(HotDrinkMaker.class);
+    DrinkMaker drinkMaker = mock(DrinkMaker.class);
 
     @Mock
     Drink drink = mock(Drink.class);
 
     @Before
     public void before() {
-        doReturn(drink).when(drinkMaker).getDrink(any(DrinkType.class), anyInt(), anyBoolean());
+        doReturn(drink).when(drinkMaker).getDrink(AdditionalMatchers.not(startsWith("M")));
+        doReturn(null).when(drinkMaker).getDrink(startsWith("M"));
     }
 
     @Test(expected = NotEnoughMoneyException.class)
-    public void testGetDrink() {
+    public void basicCommandTest() {
         CoffeeMachine coffeeMachine = new OrangeDrinkMakerProtocol(drinkMaker);
-        Drink d = coffeeMachine.getDrink("T:1:0");
+        Command c = new Command();
+        c.setName("T");
+        c.setNumberOfSugar(1);
+        Drink d = coffeeMachine.getDrink(c);
         assertNotNull(d);
     }
 
     @Test(expected = NoSuchElementException.class)
-    public void testGetDrink2() {
+    public void commandNotFoundTest() {
         CoffeeMachine coffeeMachine = new OrangeDrinkMakerProtocol(drinkMaker);
-        Drink d = coffeeMachine.getDrink("A:1:0");
+        Command c = new Command();
+        c.setName("A");
+        c.setNumberOfSugar(1);
+        Drink d = coffeeMachine.getDrink(c);
+    }
+
+    @Test
+    public void messageCommandTest() {
+        CoffeeMachine coffeeMachine = new OrangeDrinkMakerProtocol(drinkMaker);
+        Command c = new Command();
+        c.setName("M");
+        c.setMessage("Test");
+        Drink d = coffeeMachine.getDrink(c);
         assertNull(d);
     }
 
     @Test
-    public void testGetDrink3() {
-        CoffeeMachine coffeeMachine = new OrangeDrinkMakerProtocol(drinkMaker);
-        Drink d = coffeeMachine.getDrink("M:Test");
-        assertNull(d);
-    }
-
-    @Test
-    public void testGetDrink4() {
+    public void moneyTest() {
         MoneyDrinkMakerProtocol coffeeMachine = new OrangeDrinkMakerProtocol(drinkMaker);
         coffeeMachine.addMoney(1.0);
-        Drink d = coffeeMachine.getDrink("T:1:0");
+        Command c = new Command();
+        c.setName("T");
+        c.setNumberOfSugar(1);
+        Drink d = coffeeMachine.getDrink(c);
         assertNotNull(d);
         assertEquals(0.6, coffeeMachine.getPool(), 1e-15);
     }
 
     @Test(expected = NotEnoughMoneyException.class)
-    public void testGetDrink5() {
+    public void notEnoughMoneyTest() {
         MoneyDrinkMakerProtocol coffeeMachine = new OrangeDrinkMakerProtocol(drinkMaker);
         coffeeMachine.addMoney(1.0);
-        coffeeMachine.getDrink("T:1:0");
-        coffeeMachine.getDrink("T:1:0");
-        coffeeMachine.getDrink("T:1:0");
+        Command c = new Command();
+        c.setName("T");
+        c.setNumberOfSugar(1);
+        coffeeMachine.getDrink(c);
+        coffeeMachine.getDrink(c);
+        coffeeMachine.getDrink(c);
         assertEquals(0.6, coffeeMachine.getPool(), 1e-15);
     }
 
     @Test
-    public void testGetDrink6() {
+    public void getOrangeTest() {
         MoneyDrinkMakerProtocol coffeeMachine = new OrangeDrinkMakerProtocol(drinkMaker);
         coffeeMachine.addMoney(1.0);
-        Drink d = coffeeMachine.getDrink("O:1:0");
+        Command c = new Command();
+        c.setName("O");
+        c.setNumberOfSugar(1);
+        Drink d = coffeeMachine.getDrink(c);
         assertNotNull(d);
     }
 
     @Test
-    public void testGetDrink7() {
+    public void getHotTeaTest() {
         MoneyDrinkMakerProtocol coffeeMachine = new OrangeDrinkMakerProtocol(drinkMaker);
         coffeeMachine.addMoney(1.0);
-        Drink d = coffeeMachine.getDrink("Th:1:0");
+        Command c = new Command();
+        c.setName("O");
+        c.setNumberOfSugar(1);
+        c.setHot(true);
+        Drink d = coffeeMachine.getDrink(c);
         assertNotNull(d);
     }
 

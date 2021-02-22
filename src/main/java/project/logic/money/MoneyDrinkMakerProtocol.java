@@ -5,6 +5,7 @@ import project.drinkmaker.DrinkMaker;
 import project.drinkmaker.DrinkType;
 import project.drinkmaker.money.MoneyDrinkType;
 import project.drinkmaker.money.PricedDrink;
+import project.logic.basic.Command;
 import project.logic.basic.BasicDrinkMakerProtocol;
 import project.pad.MoneyPad;
 
@@ -23,13 +24,15 @@ public class MoneyDrinkMakerProtocol extends BasicDrinkMakerProtocol implements 
         super(drinkMaker, catalog);
     }
 
-    protected Drink process() {
-        double price = ((PricedDrink) selectedDrinkType).getPrice();
-        if (pool < price) {
-            throw new NotEnoughMoneyException();
+    protected Drink process(Command c) {
+        if (selectedDrinkType != null) {
+            double price = ((PricedDrink) selectedDrinkType).getPrice();
+            if (pool < price) {
+                throw new NotEnoughMoneyException();
+            }
+            pool -= price;
         }
-        pool -= price;
-        return super.process();
+        return super.process(c);
     }
 
     @Override

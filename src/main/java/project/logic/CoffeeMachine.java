@@ -3,6 +3,7 @@ package project.logic;
 import project.drinkmaker.Drink;
 import project.drinkmaker.DrinkMaker;
 import project.drinkmaker.DrinkType;
+import project.logic.basic.Command;
 
 import java.util.List;
 
@@ -18,6 +19,6 @@ public abstract class CoffeeMachine {
         this.catalog = catalog;
     }
 
-    public abstract Drink getDrink(String s);
+    public abstract Drink getDrink(Command c);
 
 }

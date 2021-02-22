@@ -14,7 +14,7 @@ import java.util.NoSuchElementException;
 
 public class BasicDrinkMakerProtocol extends CoffeeMachine implements Pad {
 
-    protected String[] command;
+    protected String command;
     protected DrinkType selectedDrinkType;
     protected int numberOfSugar = 0;
 
@@ -26,10 +26,10 @@ public class BasicDrinkMakerProtocol extends CoffeeMachine implements Pad {
         super(drinkMaker, catalog);
     }
 
-    public Drink getDrink(String s) throws NotEnoughMoneyException {
+    public Drink getDrink(Command c) throws NotEnoughMoneyException {
         try {
-            if(initCommand(s)) {
-                return process();
+            if(initCommand(c)) {
+                return process(c);
             }
         } catch (ArrayIndexOutOfBoundsException | NullPointerException e) {
             throw e;
@@ -37,46 +37,38 @@ public class BasicDrinkMakerProtocol extends CoffeeMachine implements Pad {
         return null;
     }
 
-    protected boolean initCommand(String s) {
-        try {
-            command = s.split(SPLIT_CHARACTER);
+    protected boolean initCommand(Command c) {
+        StringBuilder sb = new StringBuilder();
+        sb.append(c.getName());
+        sb.append(SPLIT_CHARACTER);
 
-            if ("M".equals(command[0])) {
-                System.out.println(command[1]);
-                return false;
-            } else {
-                this.selectedDrinkType = catalog.stream()
-                        .filter(d -> d.getLogo().charAt(0) == (command[0].charAt(0)))
-                        .findFirst()
-                        .orElseThrow(NoSuchElementException::new);
-
-                setNumberOfSugar(command[1]);
-                return true;
+        if("M".equals(c.getName())) {
+            sb.append(c.getMessage());
+        } else {
+            try {
+                    this.selectedDrinkType = catalog.stream()
+                            .filter(d -> d.getName().charAt(0) == (c.getName().charAt(0)))
+                            .findFirst()
+                            .orElseThrow(NoSuchElementException::new);
+            } catch (ArrayIndexOutOfBoundsException | NullPointerException e) {
+                throw e;
             }
 
-        } catch (ArrayIndexOutOfBoundsException | NullPointerException e) {
-            throw e;
+            sb.append(c.getNumberOfSugar());
+            sb.append(SPLIT_CHARACTER);
+            sb.append(0);
         }
+        this.command = sb.toString();
+        return true;
     }
 
-    protected void setNumberOfSugar(String s) {
-        numberOfSugar = 0;
-        try {
-            numberOfSugar = Integer.parseInt(s);
-        } catch (NumberFormatException e) {
-            numberOfSugar = 0;
-        }
-    }
 
-    protected Drink process() {
-        if (selectedDrinkType != null) {
-            return execute();
-        }
-        return null;
+    protected Drink process(Command c) {
+        return execute();
     }
 
     protected Drink execute() {
-        return drinkMaker.getDrink(selectedDrinkType, numberOfSugar);
+        return drinkMaker.getDrink(command);
     }
 
 }

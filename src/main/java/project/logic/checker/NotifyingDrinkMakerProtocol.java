@@ -1,10 +1,11 @@
 package project.logic.checker;
 
 import project.drinkmaker.Drink;
+import project.drinkmaker.DrinkMaker;
 import project.drinkmaker.DrinkType;
 import project.drinkmaker.checker.CheckingDrinkMaker;
-import project.drinkmaker.orange.HotDrinkMaker;
 import project.drinkmaker.orange.OrangeDrinkType;
+import project.logic.basic.Command;
 import project.logic.stats.StatsDrinkMakerProtocol;
 
 import java.util.Arrays;
@@ -18,16 +19,16 @@ public class NotifyingDrinkMakerProtocol extends StatsDrinkMakerProtocol impleme
         this(drinkMaker, Arrays.asList(OrangeDrinkType.values()));
     }
 
-    protected NotifyingDrinkMakerProtocol(HotDrinkMaker drinkMaker, List<? extends DrinkType> catalog) {
+    protected NotifyingDrinkMakerProtocol(DrinkMaker drinkMaker, List<? extends DrinkType> catalog) {
         super(drinkMaker, catalog);
     }
 
-    protected Drink process() {
-        if (((CheckingDrinkMaker) drinkMaker).isEmpty(selectedDrinkType.getName())) {
+    protected Drink process(Command c) {
+        if (selectedDrinkType != null && ((CheckingDrinkMaker) drinkMaker).isEmpty(selectedDrinkType.getName())) {
             notifyMissingDrink(selectedDrinkType.getName());
             return null;
         }
-        return super.process();
+        return super.process(c);
     }
 
     public void notifyMissingDrink(String drink) {

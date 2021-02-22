@@ -1,9 +1,10 @@
 package project.pad;
 
 import project.drinkmaker.Drink;
+import project.logic.basic.Command;
 
 public interface Pad {
 
-    Drink getDrink(String s);
+    Drink getDrink(Command c);
 
 }
